@@ -111,7 +111,11 @@ function isExternalRequest(url) {
 }
 
 function isFontRequest(url) {
-  return url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com');
+  const host = (url.hostname || '').toLowerCase();
+  return host === 'fonts.googleapis.com'
+    || host.endsWith('.fonts.googleapis.com')
+    || host === 'fonts.gstatic.com'
+    || host.endsWith('.fonts.gstatic.com');
 }
 
 function isStyleOrScript(request) {

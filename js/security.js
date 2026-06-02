@@ -35,8 +35,8 @@
     const src = (node.getAttribute('src') || '').trim();
     const type = (node.getAttribute('type') || '').trim().toLowerCase();
     if (!src) return true;
-    if (src.startsWith('javascript:') || src.startsWith('data:')) return true;
-    if (type && !['text/javascript', 'module', 'application/javascript', ''].includes(type)) return false;
+    if (/^(?:javascript|data|vbscript):/i.test(src)) return true;
+    if (type && !['text/javascript', 'module', 'application/javascript', ''].includes(type)) return true;
     return false;
   }
 
