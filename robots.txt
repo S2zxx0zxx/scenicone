@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /assets/
+Crawl-delay: 10
+Sitemap: https://s2zxx0zxx.github.io/scenicone/sitemap.xml
+Sitemap: https://s2zxx0zxx.github.io/scenicone/sitemap-images.xml
