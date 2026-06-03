@@ -1,47 +1,69 @@
-/* =========================================================
-   ScenicOne — Home Page JavaScript
-   Stats counter, hero load effect
-   ========================================================= */
-
+/* ScenicOne — home.js */
 (function () {
   'use strict';
 
-  /* ── Hero loaded class ── */
-  const hero = document.getElementById('hero');
-  if (hero) {
-    window.addEventListener('load', () => hero.classList.add('loaded'));
-  }
-
-  /* ── Stats Counter Animation ── */
-  function animateCounter(el, target, duration, suffix) {
-    const startTime = performance.now();
-    const startVal = 0;
-    function update(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease out quad
-      const eased = 1 - (1 - progress) * (1 - progress);
-      const current = Math.round(startVal + (target - startVal) * eased);
-      el.textContent = current + suffix;
-      if (progress < 1) requestAnimationFrame(update);
+  // ── Stat counter animation ──
+  function animateCounter(el) {
+    var target = parseInt(el.dataset.target, 10);
+    var suffix = el.dataset.suffix || '';
+    var duration = 1800;
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(ease * target) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
     }
-    requestAnimationFrame(update);
+    requestAnimationFrame(step);
   }
 
-  const statNumbers = document.querySelectorAll('.stat-number[data-target]');
-  if (statNumbers.length && 'IntersectionObserver' in window) {
-    const statsObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+  var counters = document.querySelectorAll('.stat-number[data-target]');
+  if (counters.length && 'IntersectionObserver' in window) {
+    var counterObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          const el = entry.target;
-          const target = parseInt(el.dataset.target, 10);
-          const suffix = el.dataset.suffix || '';
-          animateCounter(el, target, 2000, suffix);
-          statsObserver.unobserve(el);
+          animateCounter(entry.target);
+          counterObs.unobserve(entry.target);
         }
       });
     }, { threshold: 0.5 });
-    statNumbers.forEach(el => statsObserver.observe(el));
+    counters.forEach(function (el) { counterObs.observe(el); });
   }
+
+  // ── Lazy load product images ──
+  var lazyImgs = document.querySelectorAll('img[data-src]');
+  if (lazyImgs.length && 'IntersectionObserver' in window) {
+    var imgObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var img = entry.target;
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+          img.style.opacity = '0';
+          img.addEventListener('load', function () {
+            img.style.transition = 'opacity 0.4s ease';
+            img.style.opacity = '1';
+          });
+          imgObs.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' });
+    lazyImgs.forEach(function (img) { imgObs.observe(img); });
+  }
+
+  // ── Product card enquire button ──
+  var productCards = document.querySelectorAll('.product-card');
+  productCards.forEach(function (card) {
+    var enquireBtn = card.querySelector('.btn-enquire');
+    if (enquireBtn) {
+      enquireBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var name = card.dataset.name || 'this product';
+        var msg = 'Hi ScenicOne! I\'m interested in the ' + name + '. Please share pricing and details.';
+        window.open('https://wa.me/917891030006?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      });
+    }
+  });
 
 })();
