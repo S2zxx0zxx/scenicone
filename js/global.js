@@ -1,106 +1,62 @@
-/* =========================================================
-   ScenicOne — Global JavaScript
-   Navbar, WhatsApp, Scroll Reveal, Lazy Load, Mobile Menu
-   ========================================================= */
-
+/* ScenicOne — global.js */
 (function () {
   'use strict';
 
-  /* ── Navbar Scroll Effect ── */
-  const navbar = document.getElementById('navbar');
+  // ── Navbar scroll effect ──
+  var navbar = document.getElementById('navbar');
   if (navbar) {
-    const heroEl = document.getElementById('hero');
-    function updateNavbar() {
-      if (window.scrollY > 60) {
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 40) {
         navbar.classList.add('scrolled');
         navbar.classList.remove('transparent');
       } else {
-        if (heroEl) {
-          navbar.classList.add('transparent');
-          navbar.classList.remove('scrolled');
-        } else {
-          navbar.classList.add('scrolled');
-        }
+        navbar.classList.remove('scrolled');
+        navbar.classList.add('transparent');
       }
-    }
-    updateNavbar();
-    window.addEventListener('scroll', updateNavbar, { passive: true });
-
-    // Active link
-    const navLinks = navbar.querySelectorAll('.nav-links a');
-    const current = window.location.pathname.split('/').pop() || 'index.html';
-    navLinks.forEach(link => {
-      const href = link.getAttribute('href');
-      if (href === current || (current === '' && href === 'index.html')) {
-        link.classList.add('active');
-      }
-    });
+    }, { passive: true });
   }
 
-  /* ── Mobile Menu ── */
-  const hamburger = document.querySelector('.nav-hamburger');
-  const mobileMenu = document.querySelector('.nav-mobile-menu');
+  // ── Hamburger menu ──
+  var hamburger = document.querySelector('.nav-hamburger');
+  var mobileMenu = document.querySelector('.nav-mobile-menu');
   if (hamburger && mobileMenu) {
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      mobileMenu.classList.toggle('open');
-      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    hamburger.addEventListener('click', function () {
+      var isOpen = mobileMenu.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(isOpen));
     });
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('open');
+    // Close on outside click
+    document.addEventListener('click', function (e) {
+      if (!navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
         mobileMenu.classList.remove('open');
-        document.body.style.overflow = '';
-      });
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 
-  /* ── WhatsApp Float Button ── */
-  const waFloat = document.getElementById('wa-float');
-  if (waFloat) {
-    waFloat.addEventListener('click', () => {
-      const phone = '917891030006';
-      const msg = encodeURIComponent('Hi ScenicOne! I\'m interested in your furniture collection. Could you please share more details?');
-      window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    });
-  }
-
-  /* ── Scroll Reveal ── */
-  const revealEls = document.querySelectorAll('.reveal');
-  if (revealEls.length && 'IntersectionObserver' in window) {
-    const revealObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+  // ── Reveal on scroll ──
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
+          observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    revealEls.forEach(el => revealObserver.observe(el));
+    }, { threshold: 0.12 });
+    reveals.forEach(function (el) { observer.observe(el); });
   } else {
-    revealEls.forEach(el => el.classList.add('visible'));
+    reveals.forEach(function (el) { el.classList.add('visible'); });
   }
 
-  /* ── Lazy Load Images ── */
-  const lazyImgs = document.querySelectorAll('img[data-src]');
-  if (lazyImgs.length && 'IntersectionObserver' in window) {
-    const imgObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          if (img.dataset.srcset) img.srcset = img.dataset.srcset;
-          img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
-          imgObserver.unobserve(img);
-        }
-      });
-    }, { rootMargin: '200px' });
-    lazyImgs.forEach(img => imgObserver.observe(img));
-  } else {
-    lazyImgs.forEach(img => {
-      img.src = img.dataset.src;
-      if (img.dataset.srcset) img.srcset = img.dataset.srcset;
-      img.classList.add('loaded');
+  // ── WhatsApp float link ──
+  var waFloat = document.getElementById('wa-float');
+  if (waFloat) {
+    waFloat.addEventListener('click', function () {
+      window.open('https://wa.me/917891030006?text=Hi%20ScenicOne!%20I%27m%20interested%20in%20your%20furniture.%20Please%20share%20details.', '_blank', 'noopener');
+    });
+    waFloat.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') waFloat.click();
     });
   }
 
